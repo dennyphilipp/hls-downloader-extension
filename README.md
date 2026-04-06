@@ -40,18 +40,13 @@ hls-downloader-extension/
 
 ### Passos
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/hls-downloader.git
-   ```
+1. Abra o Chrome e acesse `chrome://extensions`
 
-2. Abra o Chrome e acesse `chrome://extensions`
+2. Ative o **Modo do desenvolvedor** (canto superior direito)
 
-3. Ative o **Modo do desenvolvedor** (canto superior direito)
+3. Clique em **Carregar sem compactação** e selecione a pasta `hls-downloader-extension`
 
-4. Clique em **Carregar sem compactação** e selecione a pasta `hls-downloader-extension`
-
-5. A extensão aparecerá na barra de ferramentas do Chrome
+4. A extensão aparecerá na barra de ferramentas do Chrome
 
 ## Como usar
 
