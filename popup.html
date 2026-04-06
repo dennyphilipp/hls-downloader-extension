@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HLS Downloader</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --border: #2a2a35;
+      --accent: #00e5a0;
+      --accent2: #7c5cfc;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --danger: #ff4d6d;
+      --warning: #ffb830;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 380px;
+      min-height: 200px;
+      max-height: 560px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+
+    .badge {
+      background: var(--accent2);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .btn {
+      flex: 1;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+    .stream-list {
+      overflow-y: auto;
+      max-height: 400px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .stream-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      transition: border-color 0.15s;
+    }
+
+    .stream-card:hover { border-color: var(--accent2); }
+
+    .stream-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stream-url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 10px;
+    }
+
+    .stream-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .status-detectado { background: #1a2a20; color: var(--accent); }
+    .status-baixando { background: #1a1a2a; color: var(--accent2); }
+    .status-erro { background: #2a1a1a; color: var(--danger); }
+    .status-enviando { background: #2a2010; color: var(--warning); }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 12px;
+      transition: all 0.15s;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+    }
+
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .icon-btn.primary { border-color: var(--accent2); color: var(--accent2); }
+    .icon-btn.primary:hover { background: var(--accent2); color: white; }
+    .icon-btn.record { border-color: var(--danger); color: var(--danger); }
+    .icon-btn.record:hover { background: var(--danger); color: white; }
+    .icon-btn.recording { border-color: var(--danger); color: white; background: var(--danger); animation: rec-pulse 1s infinite; }
+    @keyframes rec-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .footer {
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: #000;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0;
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    HLS Downloader
+  </div>
+  <span class="badge" id="count">0</span>
+</header>
+
+<div class="toolbar">
+  <button class="btn" id="btn-refresh">↺ Atualizar</button>
+  <button class="btn danger" id="btn-clear">✕ Limpar lista</button>
+</div>
+
+<div class="stream-list" id="stream-list">
+  <div class="empty-state">
+    <div class="empty-icon">📡</div>
+    <p>Nenhum stream detectado ainda.<br>Abra uma aula e dê play no vídeo.</p>
+  </div>
+</div>
+
+<div class="footer" id="footer">aguardando streams...</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
